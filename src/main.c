@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Nordic Semiconductor ASA
+ * Copyright (c) 2022 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
@@ -18,7 +18,7 @@
 #define DEVICE_NAME_LEN (sizeof(DEVICE_NAME) - 1)
 
 static int32_t temperature;
-K_SEM_DEFINE(temp_sem, 0, 1);
+K_MUTEX_DEFINE(temp_mutex);
 
 K_THREAD_STACK_DEFINE(thread_tmp112_stack_area, THREAD_STACKSIZE);
 static struct k_thread thread_tmp112_data;
@@ -92,23 +92,22 @@ void main(void)
 
 	k_thread_create(&thread_tmp112_data, thread_tmp112_stack_area,
 			K_THREAD_STACK_SIZEOF(thread_tmp112_stack_area),
-			thread_tmp112, (void *)dev, (void *)&temp_sem, (void*)&temperature,
+			thread_tmp112, (void *)dev, (void *)&temp_mutex, (void*)&temperature,
 			THREAD_PRIORITY, 0, K_FOREVER);
 	k_thread_start(&thread_tmp112_data);
 
 	/* Initialize the Bluetooth Subsystem */
-
 	err = bt_enable(bt_ready);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
 	}
-
 	printk("Bluetooth initialized\n");
 
 	for (;;) {
-		if (k_sem_take(&temp_sem, K_NO_WAIT) == 0) {
+		if (k_mutex_lock(&temp_mutex, K_MSEC(100)) == 0) {
 			manuf_data[0] = (uint8_t)((uint32_t)temperature & 0xff);
 			manuf_data[1] = (uint8_t)(((uint32_t)temperature >> 8) & 0xff);
+			k_mutex_unlock(&temp_mutex);
 		}
 		err = bt_le_adv_update_data(ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
 		if (err) {

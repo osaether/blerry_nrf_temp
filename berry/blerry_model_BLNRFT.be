@@ -1,5 +1,3 @@
-# Inkbird TH1 or TH2 with Temp only or Temp + Humidity
-# - Does not report if external sensor is being used
 def handle_BLNRFT(value, trigger, msg)
   if trigger == details_trigger
     var this_device = device_config[value['mac']]

@@ -13,9 +13,9 @@ void thread_tmp112(void *p1, void *p2, void *p3)
 	struct sensor_value temp_value;
 	struct sensor_value attr;
 
-    const struct device *dev = (const struct device *)p1;
-    struct k_sem *temp_sem = (struct k_sem *)p2;
-    int32_t *temp = (int32_t *)p3;
+	const struct device *dev = (const struct device *)p1;
+	struct k_mutex *temp_mutex = (struct k_mutex *)p2;
+	int32_t *temp = (int32_t *)p3;
 
 	attr.val1 = 150;
 	attr.val2 = 0;
@@ -47,10 +47,14 @@ void thread_tmp112(void *p1, void *p2, void *p3)
 			printk("sensor_channel_get failed ret %d\n", ret);
 			return;
 		}
-        *temp = temp_value.val1 * 1E6 + temp_value.val2;
-		float ftemp = (*temp + 5000)/10000.0;
-		*temp = ftemp;
-        k_sem_give(temp_sem);
+		if (k_mutex_lock(temp_mutex, K_MSEC(2000)) == 0) {
+			*temp = temp_value.val1 * 1E6 + temp_value.val2;
+			float ftemp = (*temp + 5000)/10000.0;
+			*temp = ftemp;
+			k_mutex_unlock(temp_mutex);
+		} else {
+			printk("Unable to lock mutex\n");
+		}
 		k_sleep(K_MSEC(2000));
 	}
 }
