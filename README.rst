@@ -2,8 +2,8 @@ This application implements a temperature sensor using the nRF52xx and `TMP112 <
 `Tasmota Blerry project <https://github.com/tony-fav/tasmota-blerry>`_.
 
 To build this project you need the `nRF Connect SDK <http://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest>`_.
-For instructions on how to install the nRF Connect SDK see the `nRF Connect SDK getting started guide <http://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/getting_started.html>`_
-Copy the files in this repo to a subfolder of the nRF Connect SDK (e.g samples/blutetooth/blerry_nrf_temp) and
+For instructions on how to install the nRF Connect SDK see the `nRF Connect SDK getting started guide <http://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/getting_started.html>`_.
+After you have installed the SDK, copy the files in this repo to a subfolder of the nRF Connect SDK (e.g samples/blutetooth/blerry_nrf_temp) and
 build with this command:
 
 ``west build -b <board name>``
